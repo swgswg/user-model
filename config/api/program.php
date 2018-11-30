@@ -13,7 +13,7 @@
 return [
     // 图片地址前缀
     'img_prefix'=> 'http://user.com/static/images/',
-
+    'token_expire_in' => 7200,
 ];
 
 // 获取 config('program.img_prefix')

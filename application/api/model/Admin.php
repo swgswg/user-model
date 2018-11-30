@@ -27,8 +27,24 @@ class Admin extends BaseModel
     protected $deleteTime = 'delete_time';
 
     // 用户角色 一对多
-    public function userRole()
+    public function roles()
     {
-        return $this->hasMany('UserRole', 'user_id','id');
+        return $this->belongsToMany('Role', 'user_role_rel','role_id', 'user_id');
+    }
+
+    /**
+     *  获取用户的角色和权限
+     * @param $id
+     * @return mixed
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\ModelNotFoundException
+     * @throws \think\exception\DbException
+     */
+    public static function getOneAuths($id)
+    {
+        $auths = self::with(['roles', 'roles.auths'])
+            ->find($id);
+//        $auths = $auths['roles']->visible(['auths'=>['auth_route', 'auth_status'=>1]])->toArray();
+        return $auths;
     }
 }

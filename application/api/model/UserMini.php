@@ -2,19 +2,17 @@
 /**
  * Created by PhpStorm.
  * User: song
- * Date: 2018/11/28
- * Time: 13:53
+ * Date: 2018/11/30
+ * Time: 14:09
  */
 
 namespace app\api\model;
 
 
-use think\model\concern\SoftDelete;
-
-class Auth extends BaseModel
+class UserMini extends BaseModel
 {
     // 设置当前模型对应的完整数据表名称
-    protected $table = 'authorities';
+    protected $table = 'user_mini';
     protected $pk = 'id';
     // 开启自动写入时间戳字段
     protected $autoWriteTimestamp = true;
@@ -26,13 +24,12 @@ class Auth extends BaseModel
     use SoftDelete;
     protected $deleteTime = 'delete_time';
 
-    public $visible = ['id', 'auth_name', 'auth_route', 'auth_route_version', 'auth_status'];
+    public $visible = ['id', 'nikename', 'profile'];
 
-    // 查询范围 查询状态为1的
-    public function scopeUserStatus($query)
+    public static function getByOpenId($openid)
     {
-        // 继承 BaseModel
-        return $this->scopeStatus($query, 'user_status');
+       $userMini = self::where('openid', '=', $openid)
+           ->find();
+       return $userMini;
     }
-
 }

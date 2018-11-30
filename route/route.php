@@ -11,8 +11,15 @@
 
 /**
  *  :version 是版本号
- *  api/v1/signIn 表示vi版本的接口
+ *  v1/v1/signIn 表示vi版本的接口
  */
 
 Route::post('api/:version/signIn', 'api/:version.User/signIn');
 Route::post('api/:version/signUp', 'api/:version.User/signUp');
+
+// 后台登陆注册
+Route::post('api/:version/admin/signIn', 'api/:version.Admin/signIn');
+Route::post('api/:version/admin/signUp', 'api/:version.Admin/signUp');
+
+// 获取微信小程序openid
+Route::post('api/:version/token', 'api/:version.Token/getToken');

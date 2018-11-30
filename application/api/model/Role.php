@@ -26,7 +26,14 @@ class Role extends BaseModel
     use SoftDelete;
     protected $deleteTime = 'delete_time';
 
-    public $visible = ['id', 'role_name'];
+    public $visible = ['id', 'role_name', 'role_status'];
+
+    // 查询范围 查询状态为1的
+    public function scopeUserStatus($query)
+    {
+        // 继承 BaseModel
+        return $this->scopeStatus($query, 'user_status');
+    }
 
     // 角色权限 多对多
     public function auths()

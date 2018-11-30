@@ -38,6 +38,13 @@ class User extends BaseModel
         return $this->prefixImgUrl($value);
     }
 
+    // 查询范围 查询状态为1的
+    public function scopeUserStatus($query)
+    {
+        // 继承 BaseModel
+        return $this->scopeStatus($query, 'user_status');
+    }
+
     // 用户角色 一对多
     public function roles()
     {
@@ -55,11 +62,12 @@ class User extends BaseModel
      */
     public static function getOneAuths($id)
     {
-        $auths = self::with(['roles', 'roles.auths'])
+        $auths = self::scope('user_status')->with(['roles', 'roles.auths'])
             ->find($id);
-//        $auths = $auths['roles']->visible(['auths'=>['auth_route']])->toArray();
+        $auths = $auths['roles']->where('role_status', '=', 1)->visible(['auths'=>['auth_route']])->toArray();
         return $auths;
     }
+
 
 
 }

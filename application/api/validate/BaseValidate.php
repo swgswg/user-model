@@ -47,7 +47,7 @@ class BaseValidate extends Validate
      * @param string $field
      * @return bool|string
      */
-    protected function isPositiveInteger($value, $rule='', $data='', $field='')
+    protected function isPositiveInteger($value, $rule = '', $data = '', $field = '')
     {
         if (is_numeric($value) && is_int($value + 0) && ($value + 0) > 0) {
             return true;
@@ -64,7 +64,7 @@ class BaseValidate extends Validate
      * @param string $field
      * @return bool|string
      */
-    protected function isNotEmpty($value, $rule='', $data='', $field='')
+    protected function isNotEmpty($value, $rule = '', $data = '', $field = '')
     {
         if (empty($value)) {
             return $field . '不允许为空';
@@ -79,7 +79,7 @@ class BaseValidate extends Validate
      * 没有使用TP的正则验证，集中在一处方便以后修改
      * 不推荐使用正则，因为复用性太差
      * @param $value
-     * @return bool
+     * @return bool|string
      */
     protected function isMobile($value)
     {
@@ -88,7 +88,7 @@ class BaseValidate extends Validate
         if ($result) {
             return true;
         } else {
-            return false;
+            return '手机号格式不正确';
         }
     }
 }

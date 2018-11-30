@@ -19,4 +19,13 @@ class BaseModel extends Model
     {
         return config('program.img_prefix').$value;
     }
+
+    // 获取用户权限
+
+
+    // 查询范围  status状态范围的查询
+    protected function scopeStatus($query, $field)
+    {
+        $query->where($field, '=', 1);
+    }
 }
