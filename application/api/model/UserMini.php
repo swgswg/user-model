@@ -8,6 +8,7 @@
 
 namespace app\api\model;
 
+use think\model\concern\SoftDelete;
 
 class UserMini extends BaseModel
 {

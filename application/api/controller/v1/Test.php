@@ -12,7 +12,7 @@ namespace app\api\controller\v1;
 use think\Controller;
 use think\Request;
 use app\api\validate\IDMustBePositiveInt;
-use app\lib\exception\TestMissException;
+use app\lib\exception\MissException;
 use app\api\model\Test as TestModel;
 use app\api\controller\common\Output;
 
@@ -23,7 +23,7 @@ class Test extends Controller
         (new IDMustBePositiveInt())->goCheck();
         $test = TestModel::getTestById($request->param('id'));
         if(!$test){
-            throw new TestMissException();
+            throw new MissException();
         }
         return Output::out($test,'获取');
     }
@@ -34,7 +34,7 @@ class Test extends Controller
         (new IDMustBePositiveInt())->goCheck();
         $test = TestModel::getTestById($request->param('id'));
         if(!$test){
-            throw new TestMissException();
+            throw new MissException();
         }
         return Output::out($test,'获取');
     }

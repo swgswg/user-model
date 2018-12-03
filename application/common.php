@@ -33,15 +33,15 @@ function curl_get($url, &$httpCode = 0)
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER,false);
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
 
-    //执行 获取url内容并输出到浏览器
-    $file_contents = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
+    //执行 获取url内容并输出到浏览器
+    $output = curl_exec($ch);
     //释放资源
     curl_close($ch);
 
+
     //返回获取的网页内容
-    return $file_contents;
+    return $output;
 }
 
 function curl_post($url, $data)
@@ -77,6 +77,30 @@ function curl_post($url, $data)
     //返回数据
     return $output;
 }
+
+
+function curl_post_raw($url, $rawData)
+{
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_HEADER, 0);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $rawData);
+    curl_setopt(
+        $ch, CURLOPT_HTTPHEADER,
+        array(
+            'Content-Type: text'
+        )
+    );
+    $data = curl_exec($ch);
+    curl_close($ch);
+    return ($data);
+}
+
+
 
 /**
  *  随机字符串

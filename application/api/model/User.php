@@ -26,9 +26,9 @@ class User extends BaseModel
     protected $deleteTime = 'delete_time';
 
     // 隐藏字段
-    // protected $hidden = ['create_time', 'update_time', 'delete_time'];
+    protected $hidden = ['update_time', 'delete_time'];
     // 显示字段
-    public $visible = ['id', 'user_name', 'user_photo'];
+//    protected $visible = ['id', 'user_name', 'user_photo'];
 
     // 读取器 get-UserPhoto(数据库字段 驼峰命名法)-Attr(固定写法)
     // 设置完整图片路径
@@ -51,6 +51,12 @@ class User extends BaseModel
         return $this->belongsToMany('Role', 'user_role_rel','role_id', 'user_id');
     }
 
+    // 用户详细信息 一对一
+    public function userDetail()
+    {
+        return $this->hasOne('UserDetail', 'user_id', 'id');
+    }
+
 
     /**
      *  获取用户的角色和权限
@@ -69,5 +75,29 @@ class User extends BaseModel
     }
 
 
+    // 检测用户名是否存在
+    public static function userNameIsExist($field, $user_name)
+    {
+        $user = self::where($field, '=', $user_name)
+            ->find();
+        return $user;
+    }
+
+
+    /**
+     * 展示所有用户 分页
+     * @param int $page
+     * @param int $pageSize
+     * @return \think\Paginator
+     * @throws \think\exception\DbException
+     */
+    public static function allUsers($page = 1, $pageSize = 15)
+    {
+        $pageDate = self::where('user_status', '=', 1)
+            ->order('create_time', 'desc')
+            ->paginate($pageSize, false, ['page'=>$page]);
+        var_dump($pageDate);
+        return $pageDate;
+    }
 
 }

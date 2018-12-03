@@ -13,7 +13,10 @@
 return [
     // 图片地址前缀
     'img_prefix'=> 'http://user.com/static/images/',
+    // 缓存时间
     'token_expire_in' => 7200,
+    // 微信支付回调地址
+    'pay_back_url'=> 'http://user.com/api/pay/notify'
 ];
 
-// 获取 config('program.img_prefix')
+// 获取 config('program.pay_back_url')

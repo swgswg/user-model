@@ -10,6 +10,7 @@ namespace app\api\service;
 
 
 use app\api\model\UserMini;
+use app\lib\enum\ScopeEnum;
 use app\lib\exception\TokenException;
 use app\lib\exception\WxChatException;
 use think\Exception;
@@ -31,9 +32,13 @@ class UserMiniToken extends Token
 
     public function get()
     {
-        $result = curl_get($this->wxLoginUrl);
-        $wxResult = json_decode($result, true);
-        var_dump($wxResult);
+        // $result = curl_get($this->wxLoginUrl);
+        // {openid:"oWXIA5fhg5-BLAYL5B8QEXAznhNE",session_key:"Nqa2VZ8Cn4hXvlKmEzAwFA=="}
+        // $wxResult = json_decode($result, true);
+        $wxResult = [
+            'openid'=>'oWXIA5fhg5-BLAYL5B8QEXAznhNE',
+            'session_key'=>'Nqa2VZ8Cn4hXvlKmEzAwFA=='
+        ];
         if(empty($wxResult)){
             throw new Exception('获取session_key及openID时异常, 微信内部错误');
         } else {
@@ -43,13 +48,18 @@ class UserMiniToken extends Token
                 $this->processLoginError($wxResult);
 
             } else {
-                $this->grantToken($wxResult);
+                return $this->grantToken($wxResult);
             }
         }
     }
 
 
-
+    /**
+     * 授予Token
+     * @param $wxResult
+     * @return string
+     * @throws TokenException
+     */
     private function grantToken($wxResult)
     {
         // 拿到openid
@@ -66,7 +76,7 @@ class UserMiniToken extends Token
         } else {
             $uid = $this->newUserMini($openid);
         }
-        $cacheValue = $this->preparecacheValue($wxResult, $uid);
+        $cacheValue = $this->prepareCacheValue($wxResult, $uid);
         $token = $this->saveToCache($cacheValue);
         return $token;
     }
@@ -87,20 +97,27 @@ class UserMiniToken extends Token
 
 
     /**
+     *  准备缓存值
      * @param $wxResult
      * @param $uid
      * @return mixed
      */
-    private function preparecacheValue($wxResult, $uid)
+    private function prepareCacheValue($wxResult, $uid)
     {
         $cacheValue = $wxResult;
         $cacheValue['uid'] = $uid;
-        $cacheValue['scope'] = 16;
+        // scope=16代表用户权限
+        $cacheValue['scope'] = ScopeEnum::User;
         return $cacheValue;
     }
 
 
-
+    /**
+     *  保存到缓存值
+     * @param $cacheValue
+     * @return string
+     * @throws TokenException
+     */
     private function saveToCache($cacheValue)
     {
         $key = self::generateToken();

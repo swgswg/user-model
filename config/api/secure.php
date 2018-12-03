@@ -7,5 +7,5 @@
  */
 
 return [
-    'token_salt' => 'ag457wreHEer14qGDGga'
+    'token_salt' => '888songweiguo888'
 ];
