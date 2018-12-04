@@ -18,7 +18,7 @@ class addUserDetailValidate extends BaseValidate
         'birthday'   => 'dateFormat:y-m-d',
         'sex'        => 'in:0,1,2',
         'real_name'  => 'chs',
-        'id_card'    => 'IDCard',
+        'id_card'    => 'idCard',
     ];
 
     protected $message=[
@@ -27,5 +27,6 @@ class addUserDetailValidate extends BaseValidate
         'birthday.dateFormat' => '用户生日格式不正确,正确格式为2018-12-03',
         'sex.in'              => '用户性别格式不正确,在0,1,2之间选择',
         'real_name.chs'       => '用户真实姓名为中文',
+        'id_card.idCard'      => '身份证格式不正确',
     ];
 }

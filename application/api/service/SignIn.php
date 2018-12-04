@@ -52,6 +52,7 @@ class SignIn
         } else {
             $data = $data->toArray();
         }
+
 //        $data['scope'] = ScopeEnum::User;
         $token = self::getToken($data['id']);
         unset($data['id']);
@@ -88,7 +89,7 @@ class SignIn
         // 用户登录
         $user = UserModel::where($field,'=',$user_name)
             ->where('user_pass', '=', $user_pass)
-            ->where('user_status', '=', 1)
+            ->visible(['id','user_name', 'user_photo'])
             ->find();
         if(!$user){
             throw new UserException();
@@ -103,6 +104,13 @@ class SignIn
             throw new UserException([
                 'message'=>'更新登录信息失败',
                 'errorCode' => 20001
+            ]);
+        }
+        if($user->user_status == 2){
+            throw new UserException([
+                'code'=>403,
+                'message' => '用户禁止登陆',
+                'errorCode' => 20005
             ]);
         }
         return $user;

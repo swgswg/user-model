@@ -11,17 +11,21 @@
 
 /**
  *  :version 是版本号
- *  v1/v1/signIn 表示vi版本的接口
+ *  v1/signIn 表示v1版本的接口
  */
 
-// 用户
 Route::group('api/:version/', function (){
     Route::post('/signIn', 'api/:version.User/signIn');
     Route::post('/signUp', 'api/:version.User/signUp');
     Route::post('/userNameIsExist', 'api/:version.User/userNameIsExist');
     Route::post('/userMobileIsExist', 'api/:version.User/userMobileIsExist');
     Route::post('/userEmailIsExist', 'api/:version.User/userEmailIsExist');
-    Route::post('/getAllUsers', 'api/:version.User/getAllUsers');
+});
+
+
+// 用户
+Route::group('api/:version/user/', function (){
+    Route::post('/index', 'api/:version.User/getAllUsers');
 });
 
 
@@ -34,13 +38,23 @@ Route::group('api/:version/', function (){
 
 
 // 角色
-Route::group('api/:version/', function (){
-
+Route::group('api/:version/role/', function (){
+    Route::post('/index', 'api/:version.Role/index');
+    Route::post('/create', 'api/:version.Role/create');
+    Route::post('/show', 'api/:version.Role/show');
+    Route::post('/edit', 'api/:version.Role/edit');
+    Route::post('/editStatus', 'api/:version.Role/editStatus');
+    Route::post('/delete', 'api/:version.Role/delete');
 });
 
 // 权限
-Route::group('api/:version/', function (){
-
+Route::group('api/:version/auth/', function (){
+    Route::post('/index', 'api/:version.Auth/index');
+    Route::post('/show', 'api/:version.Auth/show');
+    Route::post('/create', 'api/:version.Auth/create');
+    Route::post('/edit', 'api/:version.Auth/edit');
+    Route::post('/editStatus', 'api/:version.Auth/editStatus');
+    Route::post('/delete', 'api/:version.Auth/delete');
 });
 
 // 获取微信小程序openid

@@ -34,6 +34,7 @@ class UserAuth
         if(!in_array($requestRoute, $publicRoutes)){
             // 获取所有路由
             $routes = Token::getCurrentRoutes();
+//            print_r($routes);
             if(!in_array($requestRoute, $routes)){
                 throw new ForbiddenException();
             }

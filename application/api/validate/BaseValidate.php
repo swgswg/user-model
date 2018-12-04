@@ -140,17 +140,26 @@ class BaseValidate extends Validate
      * @param $value
      * @return bool|string
      */
-    protected function IDCard($value)
+//    protected function IDCard($value)
+//    {
+//        $rule = '/^[1-9]\d{5}(18|19|([23]\d))\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/';
+//        $result = preg_match($rule, $value);
+//        if ($result) {
+//            return true;
+//        } else {
+//            return '身份证号格式不正确';
+//        }
+//    }
+
+    protected function isArr($value, $rule = '', $data = '', $field = '')
     {
-        $rule = '/^[1-9]\d{5}(18|19|([23]\d))\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/';
-        $result = preg_match($rule, $value);
-        if ($result) {
+        $val = json_decode($value);
+        if(is_array($val) && !empty($val)){
             return true;
         } else {
-            return '身份证号格式不正确';
+            return $field.'是数组且不能为空';
         }
     }
-
 
     /**
      *  检测参数中是否包含user_id, 获取rule验证的参数

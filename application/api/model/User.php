@@ -26,7 +26,7 @@ class User extends BaseModel
     protected $deleteTime = 'delete_time';
 
     // 隐藏字段
-    protected $hidden = ['update_time', 'delete_time'];
+    protected $hidden = ['update_time', 'delete_time', 'ext'];
     // 显示字段
 //    protected $visible = ['id', 'user_name', 'user_photo'];
 
@@ -70,7 +70,7 @@ class User extends BaseModel
     {
         $auths = self::scope('user_status')->with(['roles', 'roles.auths'])
             ->find($id);
-        $auths = $auths['roles']->where('role_status', '=', 1)->visible(['auths'=>['auth_route']])->toArray();
+        $auths = $auths['roles']->where('role_status', '=', 1)->visible(['auths'=>['auth_route', 'auth_status']])->toArray();
         return $auths;
     }
 
@@ -85,19 +85,36 @@ class User extends BaseModel
 
 
     /**
-     * 展示所有用户 分页
-     * @param int $page
-     * @param int $pageSize
+     * 展示所有用户 分页+条件+排序
+     * @param $wheres 前端传过来的条件 $wheres [page:1, pageSize: 15, where:[], order:[]]
      * @return \think\Paginator
      * @throws \think\exception\DbException
      */
-    public static function allUsers($page = 1, $pageSize = 15)
+    public static function userCondition($wheres)
     {
-        $pageDate = self::where('user_status', '=', 1)
-            ->order('create_time', 'desc')
-            ->paginate($pageSize, false, ['page'=>$page]);
-        var_dump($pageDate);
+        $conditions = self::whereList($wheres);
+        $pageDate = self::where($conditions['where'])
+            ->order($conditions['order'])
+            ->order('create_time','desc')
+            ->paginate($conditions['pageSize'], false, ['page'=>$conditions['page']]);
         return $pageDate;
+    }
+
+    // 拼接条件
+    private static function whereList($wheres)
+    {
+        $whereFields = [
+            ['user_mobile', 'like', ''],
+            ['user_name',   'like', ''],
+            ['user_email',  'like', ''],
+            ['user_status', '=', ''],
+        ];
+        $orderFields = [
+            'login_count'     => '',
+            'last_login_time' => '',
+        ];
+        $conditions = self::splicingCondition($wheres,$whereFields, $orderFields);
+        return $conditions;
     }
 
 }

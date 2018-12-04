@@ -92,14 +92,7 @@ class UserDetail extends BaseController
     }
 
 
-
-    /**
-     *  更新或者修改用户详情
-     * @param $user_id 用户id
-     * @param $detail  详情字段
-     * @throws UserException
-     * @throws \think\Exception\DbException
-     */
+    // 更新或者修改用户详情
     private function createOrUpdate($user_id, $detail)
     {
         $user = UserModel::get($user_id);

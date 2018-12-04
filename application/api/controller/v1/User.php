@@ -19,7 +19,7 @@ use app\api\validate\SignUpValidate;
 use app\api\validate\UserEmailValidate;
 use app\api\validate\UserMobileValidate;
 use app\api\validate\UserNameValidate;
-use app\api\validate\PageValidate;
+use app\api\validate\SplicingConditionValidate;
 use app\api\controller\v1\common\Output;
 
 class User extends BaseController
@@ -117,31 +117,38 @@ class User extends BaseController
 
 
     /**
-     *  获取所有用户 分页
+     *  获取所有用户  分页+条件+排序
      * @param page (不传默认1)
      * @param pageSize (不传默认15)
+     * @param where 条件数组
+     * @param order 排序数组
      * @return \think\response\Json
      * @throws \app\lib\exception\ParameterException
      * @throws \think\exception\DbException
      */
-    public function getAllUsers()
+    public function index()
     {
-        (new PageValidate())->goCheck();
-        $page = Request::post('page', 1);
-        $pageSize = Request::post('pageSize', 15);
-        $users = UserModel::allUsers($page,$pageSize);
-        $currentPage = $users->currentPage();
+        (new SplicingConditionValidate())->goCheck();
+        $users = UserModel::userCondition(Request::post());
+        // $currentPage = $users->currentPage(); 当前页
         if($users->isEmpty()){
-            $data = [
-                'current_page' => $currentPage,
-                'data' => []
-            ];
-            return Output::out('获取所有用户', $data);
+            return Output::out('获取所有用户', []);
         }
         $data = $users->hidden(['user_pass', 'token', 'ext', 'update_time', 'delete_time'])
             ->toArray();
         return Output::out('获取所有用户', $data);
     }
+
+
+    // 修改用户状态
+
+    // 添加用户角色
+
+    // 删除用户角色
+
+
+
+
 
 
 }

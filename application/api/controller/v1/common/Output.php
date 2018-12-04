@@ -19,7 +19,7 @@ class Output extends Controller
         if($flag){
             $msg = $message;
         }
-        if($data){
+        if($data !== '' ){
             $result = [
                 'message' => $msg,
                 'state'=> 1,
