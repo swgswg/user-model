@@ -21,7 +21,7 @@ class BaseValidate extends Validate
         // 获取http传入的参数
         // 对参数做校验
         $params = Request::post();
-        var_dump($params);
+//        var_dump($params);
         $res = $this->batch()->check($params);
         if(!$res){
             $err = $this->getError();

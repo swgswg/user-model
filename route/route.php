@@ -26,6 +26,10 @@ Route::group('api/:version/', function (){
 // 用户
 Route::group('api/:version/user/', function (){
     Route::post('/index', 'api/:version.User/getAllUsers');
+    Route::post('/editStatus', 'api/:version.User/editStatus');
+    Route::post('/allRoles', 'api/:version.User/allRoles');
+    Route::post('/addUserRoles', 'api/:version.User/addUserRoles');
+    Route::post('/deleteUserRole', 'api/:version.User/deleteUserRole');
 });
 
 
@@ -56,6 +60,9 @@ Route::group('api/:version/auth/', function (){
     Route::post('/editStatus', 'api/:version.Auth/editStatus');
     Route::post('/delete', 'api/:version.Auth/delete');
 });
+
+//token
+Route::post('api/:version/token/verify', 'api/:version.Token/verifyToken');
 
 // 获取微信小程序openid
 Route::post('api/:version/miniGetToken', 'api/:version.Token/miniGetToken');

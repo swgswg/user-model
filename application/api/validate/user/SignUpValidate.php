@@ -6,8 +6,9 @@
  * Time: 21:48
  */
 
-namespace app\api\validate;
+namespace app\api\validate\user;
 
+use app\api\validate\BaseValidate;
 
 class SignUpValidate extends BaseValidate
 {

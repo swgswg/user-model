@@ -9,17 +9,20 @@
 namespace app\api\controller\v1;
 
 
+use app\api\validate\IDMustBePositiveInt;
+use app\api\validate\user\AddUserRolesValidate;
 use think\facade\Request;
 use app\api\model\User as UserModel;
 use app\api\service\SignIn as SignInService;
 use app\api\service\SignUp as SignUpService;
 use app\lib\exception\UserException;
-use app\api\validate\SignInValidate;
-use app\api\validate\SignUpValidate;
-use app\api\validate\UserEmailValidate;
-use app\api\validate\UserMobileValidate;
-use app\api\validate\UserNameValidate;
+use app\api\validate\user\SignInValidate;
+use app\api\validate\user\SignUpValidate;
+use app\api\validate\user\UserEmailValidate;
+use app\api\validate\user\UserMobileValidate;
+use app\api\validate\user\UserNameValidate;
 use app\api\validate\SplicingConditionValidate;
+use app\api\validate\EditStatusValidate;
 use app\api\controller\v1\common\Output;
 
 class User extends BaseController
@@ -124,7 +127,6 @@ class User extends BaseController
      * @param order 排序数组
      * @return \think\response\Json
      * @throws \app\lib\exception\ParameterException
-     * @throws \think\exception\DbException
      */
     public function index()
     {
@@ -140,15 +142,117 @@ class User extends BaseController
     }
 
 
-    // 修改用户状态
+    /**
+     * 修改用户状态
+     * @param id
+     * @param status
+     * @throws UserException
+     * @throws \app\lib\exception\ParameterException
+     */
+    public function editStatus()
+    {
+        (new EditStatusValidate())->goCheck();
+        $user = $this->getUser(Request::post('id'));
+        $user->user_status = Request::post('status');
+        $user->save();
+        Output::out('状态修改');
+    }
 
-    // 添加用户角色
 
-    // 删除用户角色
+    /**
+     * 获取用户所有角色
+     * @param id 用户id
+     * @return \think\response\Json
+     * @throws UserException
+     * @throws \app\lib\exception\ParameterException
+     */
+    public function allRoles()
+    {
+        (new IDMustBePositiveInt())->goCheck();
+        $user = $this->getUser(Request::post('id'));
+        $roles = $user->roles;
+        if($roles->isEmpty()){
+            Output::out('获取用户角色', []);
+        }
+        $all = $roles->visible([
+            'id',
+            'role_name',
+            'role_desc',
+            'role_order',
+            'pivot.id',
+            'pivot.create_time'
+        ])->toArray();
+        return Output::out('获取用户角色', $all);
+    }
 
 
+    /**
+     * 添加用户角色 可一次添加多个
+     * @param id 用户id
+     * @param user_role 角色数组[1,2,3]
+     * @return \think\response\Json
+     * @throws UserException
+     * @throws \app\lib\exception\ParameterException
+     */
+    public function addUserRoles()
+    {
+        (new AddUserRolesValidate())->goCheck();
+        $user = $this->getUser(Request::post('id'));
+        $user_role = Request::post('user_role');
+        if(!is_array($user_role)){
+            $user_role = json_decode($user_role);
+        }
+        $res = $user->roles()->saveAll($user_role);
+        if($res){
+            return Output::out('添加成功');
+        } else {
+            throw new UserException([
+                'code'=>400,
+                'message'=> '添加用户角色失败',
+                'errorCode' => 20007
+            ]);
+        }
+    }
 
 
+    /**
+     * 删除用户角色 可批量操作
+     * @param id 用户id
+     * @param user_role 删除用户角色 数组
+     * @return \think\response\Json
+     * @throws UserException
+     * @throws \app\lib\exception\ParameterException
+     */
+    public function deleteUserRole()
+    {
+        (new AddUserRolesValidate())->goCheck();
+        $user = $this->getUser(Request::post('id'));
+        $user_role = Request::post('user_role');
+        if(!is_array($user_role)){
+            $user_role = json_decode($user_role);
+        }
+        $res = $user->roles()->detach($user_role);
+        if($res){
+            return Output::out('删除成功');
+        } else {
+            throw new UserException([
+                'code'=>400,
+                'message'=> '删除用户角色失败',
+                'errorCode' => 20006
+            ]);
+        }
+    }
+
+
+    // 获取用户
+    private function getUser($id)
+    {
+        $user = UserModel::get($id);
+        if(!$user){
+            throw new UserException();
+        }
+        return $user;
+    }
 
 
 }

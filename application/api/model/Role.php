@@ -54,25 +54,20 @@ class Role extends BaseModel
     // 获取所有角色 条件/分页
     public static function allRoles($wheres)
     {
-        $list = self::whereList($wheres);
-        $pageData = self::where($list['where'])
-            ->order('create_time', 'desc')
-            ->order('role_order', 'desc')
-            ->paginate($list['pageSize'], false, ['page'=>$list['page']]);
-        return $pageData;
-    }
-
-    // 拼接条件 继承基类
-    private static function whereList($wheres)
-    {
+//        $list = self::whereList($wheres);
+//        $pageData = self::where($list['where'])
+//            ->order('create_time', 'desc')
+//            ->order('role_order', 'desc')
+//            ->paginate($list['pageSize'], false, ['page'=>$list['page']]);
+//        return $pageData;
         $fields = [
             'role_name'=>['role_name', 'like', ''],
             'role_group'=>['role_group', '=', ''],
             'role_status'=>['role_status', '=', ''],
         ];
-        $where = self::splicingCondition($wheres, $fields);
-        return $where;
+        return self::paging($wheres, $fields);
     }
+
 
     // 角色详情
     public static function roleDetail($id)

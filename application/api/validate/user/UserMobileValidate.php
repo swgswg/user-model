@@ -6,8 +6,9 @@
  * Time: 0:31
  */
 
-namespace app\api\validate;
+namespace app\api\validate\user;
 
+use app\api\validate\BaseValidate;
 
 class UserMobileValidate extends BaseValidate
 {

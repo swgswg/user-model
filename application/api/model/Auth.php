@@ -41,21 +41,15 @@ class Auth extends BaseModel
      * 根据条件获取所有的权限 分页+条件+排序
      * @param $wheres [page:1, pageSize: 15, where:[], order:[]]
      * @return \think\Paginator
-     * @throws \think\exception\DbException
      */
     public static function authCondition($wheres)
     {
-        $conditions = self::whereList($wheres);
-        $pageData = self::where($conditions['where'])
-            ->order($conditions['order'])
-            ->order('create_time', 'desc')
-            ->paginate($conditions['pageSize'], false, ['page'=>$conditions['page']]);
-        return $pageData;
-    }
-
-    // 拼接条件 继承基类
-    private static function whereList($wheres)
-    {
+//        $conditions = self::whereList($wheres);
+//        $pageData = self::where($conditions['where'])
+//            ->order($conditions['order'])
+//            ->order('create_time', 'desc')
+//            ->paginate($conditions['pageSize'], false, ['page'=>$conditions['page']]);
+//        return $pageData;
         $whereFields = [
             'auth_route'   =>['auth_route', 'like', ''],
             'auth_version' =>['auth_route_version', 'like', ''],
@@ -67,9 +61,7 @@ class Auth extends BaseModel
             'auth_version' => '',
             'auth_order'   => '',
         ];
-        $conditions = self::splicingCondition($wheres,$whereFields, $orderFields);
-        return $conditions;
+        return self::paging($wheres, $whereFields, $orderFields);
     }
-
 
 }

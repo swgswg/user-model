@@ -6,10 +6,11 @@
  * Time: 15:10
  */
 
-namespace app\api\validate;
+namespace app\api\validate\user;
 
+use app\api\validate\BaseValidate;
 
-class addUserDetailValidate extends BaseValidate
+class AddUserDetailValidate extends BaseValidate
 {
     protected $rule = [
         'user_money' => 'money',

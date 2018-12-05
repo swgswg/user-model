@@ -9,15 +9,15 @@
 namespace app\api\controller\v1;
 
 
-use app\api\validate\IDMustBePositiveInt;
 use think\facade\Request;
 use app\api\model\User as UserModel;
 use app\api\model\UserDetail as UserDetailModel;
 use app\api\service\Token as TokenService;
 use app\api\controller\v1\common\Output;
-use app\api\validate\addUserDetailValidate;
+use app\api\validate\user\AddUserDetailValidate;
 use app\lib\exception\IllegalOperation;
 use app\lib\exception\UserException;
+use app\api\validate\IDMustBePositiveInt;
 
 class UserDetail extends BaseController
 {
@@ -54,7 +54,7 @@ class UserDetail extends BaseController
     public function updateUserDetail()
     {
         $user_id = TokenService::getCurrentUid();
-        $validate = new addUserDetailValidate();
+        $validate = new AddUserDetailValidate();
         $validate->goCheck();
         // 根据规则取字段是很有必要的，防止恶意更新非客户端字段
         $detail = $validate->getDataByRule(Request::post());
@@ -71,7 +71,6 @@ class UserDetail extends BaseController
      * @throws \app\lib\exception\ParameterException
      * @throws \app\lib\exception\TokenException
      * @throws \think\Exception
-     * @throws \think\Exception\DbException
      */
     public function editUserDetail()
     {
@@ -83,7 +82,7 @@ class UserDetail extends BaseController
             // 管理员修改用户详情的用户id不能跟自己id相同, 否则就是用户自己操作, 属于非法操作
             throw new IllegalOperation();
         }
-        $validate = new addUserDetailValidate();
+        $validate = new AddUserDetailValidate();
         $validate->goCheck();
         // 根据规则取字段是很有必要的，防止恶意更新非客户端字段
         $detail = $validate->getDataByRule(Request::post());
@@ -103,7 +102,7 @@ class UserDetail extends BaseController
         $userDetail = $user->userDetail;
         if(!$userDetail){
             // 用户详情不存在
-            // 关联属性不存在，则新建
+            // 关联属性不存在，则新建 新增的save来自于关联关系
             $user->userDetail()->save($detail);
         } else {
             // 存在则更新

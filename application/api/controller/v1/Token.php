@@ -10,12 +10,14 @@ namespace app\api\controller\v1;
 
 
 use app\api\service\UserToken as UserTokenService;
+use app\lib\exception\ParameterException;
 use think\Request;
 use app\api\service\UserMiniToken;
 use app\api\validate\TokenGet;
-use app\api\validate\SignInValidate;
+use app\api\validate\user\SignInValidate;
 use app\api\service\SignIn as SignInService;
 use app\api\controller\v1\common\Output;
+use app\api\service\Token as TokenService;
 
 class Token extends BaseController
 {
@@ -46,6 +48,27 @@ class Token extends BaseController
         $ut = new UserTokenService($user['id']);
         $token = $ut -> get();
         return Output::out('获取Token', $token);
+    }
+
+
+    /**
+     * 检测token
+     * @param token
+     * @return array
+     * @throws ParameterException
+     */
+    public function verifyToken()
+    {
+        $token = Request::post('token');
+        if(!$token){
+            throw new ParameterException([
+                'code'=> 403,
+                'message'=>'token不允许为空'
+            ]);
+        }
+        $valid = TokenService::verifyToken($token);
+        $data =  ['isValid' => $valid];
+        return Output::out('检测token', $data);
     }
 
 

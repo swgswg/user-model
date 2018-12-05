@@ -29,7 +29,8 @@ class UserAuth
         // 公共路由
         $publicRoutes = [
             '/api/v1/signIn',  // 登录
-            '/api/v1/signUp'   // 注册
+            '/api/v1/signUp',   // 注册
+            '/api/v1/token/verify' // 检测token
         ];
         if(!in_array($requestRoute, $publicRoutes)){
             // 获取所有路由

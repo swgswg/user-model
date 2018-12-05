@@ -48,7 +48,7 @@ class User extends BaseModel
     // 用户角色 一对多
     public function roles()
     {
-        return $this->belongsToMany('Role', 'user_role_rel','role_id', 'user_id');
+        return $this->belongsToMany('Role', '\\app\\api\\model\\UserRole','role_id', 'user_id');
     }
 
     // 用户详细信息 一对一
@@ -88,21 +88,15 @@ class User extends BaseModel
      * 展示所有用户 分页+条件+排序
      * @param $wheres 前端传过来的条件 $wheres [page:1, pageSize: 15, where:[], order:[]]
      * @return \think\Paginator
-     * @throws \think\exception\DbException
      */
     public static function userCondition($wheres)
     {
-        $conditions = self::whereList($wheres);
-        $pageDate = self::where($conditions['where'])
-            ->order($conditions['order'])
-            ->order('create_time','desc')
-            ->paginate($conditions['pageSize'], false, ['page'=>$conditions['page']]);
-        return $pageDate;
-    }
-
-    // 拼接条件
-    private static function whereList($wheres)
-    {
+//        $conditions = self::whereList($wheres);
+//        $pageDate = self::where($conditions['where'])
+//            ->order($conditions['order'])
+//            ->order('create_time','desc')
+//            ->paginate($conditions['pageSize'], false, ['page'=>$conditions['page']]);
+//        return $pageDate;
         $whereFields = [
             ['user_mobile', 'like', ''],
             ['user_name',   'like', ''],
@@ -113,8 +107,8 @@ class User extends BaseModel
             'login_count'     => '',
             'last_login_time' => '',
         ];
-        $conditions = self::splicingCondition($wheres,$whereFields, $orderFields);
-        return $conditions;
+        return self::paging($wheres, $whereFields, $orderFields);
     }
+
 
 }

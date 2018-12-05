@@ -6,8 +6,9 @@
  * Time: 0:33
  */
 
-namespace app\api\validate;
+namespace app\api\validate\user;
 
+use app\api\validate\BaseValidate;
 
 class UserEmailValidate extends BaseValidate
 {

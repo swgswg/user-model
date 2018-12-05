@@ -29,31 +29,43 @@ class BaseModel extends Model
 
     /**
      * 处理页码+条件+排序
-     * @param $condition 条件
+     * @param $condition 条件 [page:1,pageSize:15, where:[], order:[]]
      * @param array $whereFields where字段
      * @param array $orderFields order字段
      * @return array
      */
-    protected static function splicingCondition($condition, $whereFields = [], $orderFields = [])
+    private static function splicingCondition($condition, $whereFields = [], $orderFields = [])
     {
-        $paging = self::splicingPage($condition);
+        $page = self::splicingPage($condition);
 
         $where = [];
         if( (!empty($condition['where'])) && (!empty($whereFields)) ){
             $w = self::jsonToArray($condition['where']);
             $where = self::splicingWhere($w, $whereFields);
         }
-        $paging['where'] = $where;
+        $page['where'] = $where;
 
         $order = [];
         if( (!empty($condition['order'])) && (!empty($orderFields)) ){
             $o = self::jsonToArray($condition['order']);
             $order = self::splicingOrder($o, $orderFields);
         }
-        $paging['order'] = $order;
+        $page['order'] = $order;
 
-        return $paging;
+        return $page;
     }
+
+    // paginate
+    protected static function paging($condition, $whereFields = [], $orderFields = [])
+    {
+        $conditions = self::splicingCondition($condition, $whereFields, $orderFields);
+        $pageDate = self::where($conditions['where'])
+            ->order($conditions['order'])
+            ->order('create_time','desc')
+            ->paginate($conditions['pageSize'], false, ['page'=>$conditions['page']]);
+        return $pageDate;
+    }
+
 
     // json数组处理
     private static function jsonToArray($data)
@@ -73,13 +85,11 @@ class BaseModel extends Model
             $page = 1;
         } else {
             $page = $wheres['page'];
-            unset($wheres['page']);
         }
         if(empty($wheres['pageSize'])){
             $pageSize = 15;
         } else {
             $pageSize = $wheres['pageSize'];
-            unset($wheres['pageSize']);
         }
         return [
             'page'=>$page,
