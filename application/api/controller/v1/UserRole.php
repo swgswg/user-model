@@ -6,10 +6,9 @@
  * Time: 11:40
  */
 
-namespace app\api\controller;
+namespace app\api\controller\v1;
 
 
-use app\api\controller\v1\BaseController;
 use app\api\model\UserRole as UserRoleModel;
 
 class UserRole extends BaseController

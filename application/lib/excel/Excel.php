@@ -38,16 +38,16 @@ class Excel
         $keys = ['a', 'b', 'c'];
          */
 //        $heads = [
-//            'A' => 'ID',
-//            'B' => '路由',
-//            'C' => '版本',
-//            'D' => '路由名称',
-//            'E' => '路由描述',
-//            'F' => '路由排序',
-//            'G' => '路由状态',
-//            'H' => 'create_time',
-//            'I' => 'update_time',
-//            'J' => 'delete_time',
+//            'ID',
+//            '路由',
+//            '版本',
+//            '路由名称',
+//            '路由描述',
+//            '路由排序',
+//            '路由状态',
+//            'create_time',
+//            'update_time',
+//            'delete_time',
 //        ];
 //        $keys = [
 //            'id', 'auth_route', 'auth_route_version', 'auth_name',
@@ -60,13 +60,18 @@ class Excel
             ]);
         }
 
+        // 根据表头获取excel列表头字母
+        $headsWorld = self::excelHeadWorld($heads);
+
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
         //循环设置表头
-        foreach ($heads as $k=>$v) {
-            $sheet->setCellValue($k. '1', $v);
-            $sheet->getColumnDimension($k)->setWidth(20);
+        $i = 0;
+        foreach ($heads as $v) {
+            $sheet->setCellValue($headsWorld[$i]. '1', $v);
+            $sheet->getColumnDimension($headsWorld[$i])->setWidth(20);
+            ++$i;
         }
 
         // Rename worksheet
@@ -76,16 +81,18 @@ class Excel
             $i = 2;
             foreach ($data as $k => $v) {
                 // Add data
-                $j = 0;
-                foreach ($heads as $kk => $vv){
-//                    var_dump([$kk.$i, $v[$keys[$j]]]);
-                    $sheet->setCellValue($kk.$i, $v[$keys[$j]]);
-                    ++$j;
+                foreach ($headsWorld as $kk => $vv){
+//                    var_dump([$vv.$i, $v[$keys[$kk]]]);
+                    if(isset($keys[$kk])){
+                        $val = $v[$keys[$kk]];
+                    } else {
+                        $val = '';
+                    }
+                    $sheet->setCellValue($vv.$i, $val);
                 }
                 ++$i;
             }
         }
-
         // Set alignment
         // $spreadsheet->getActiveSheet()->getStyle('A1:K'.$i)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
         // $spreadsheet->getActiveSheet()->getStyle('C2:C'.$i)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
@@ -106,11 +113,15 @@ class Excel
         // $writer = new Xlsx($spreadsheet);
         $path = config('program.static_excel'). $fileName . '.' . $ext;
         $writer->save($path);
+        // 清除内存
+        $spreadsheet->disconnectWorksheets();
+        unset($spreadsheet);
+
         return config('program.excel_prefix'). $fileName . '.' . $ext;
 
     }
 
-    private function excelHeadWorld()
+    private static function excelHeadWorld($head)
     {
         $world = [
             'A', 'B', 'C', 'D', 'E', 'F', 'G',
@@ -118,8 +129,31 @@ class Excel
             'O', 'P', 'Q', 'R', 'S', 'T', 'U',
             'V', 'W', 'X', 'Y', 'Z'
         ];
+        $count = count($head);
+        $i = floor($count/25) - 1;
+        $j = $count % 25;
+        self::getWorldArr($world, $i, $j, $data);
+        return $data;
     }
 
+    private static function getWorldArr($world, $i, $j,&$data)
+    {
+        if($i < -1){
+            return;
+        }
+        if(!$data){
+            $data = [];
+        }
+        if($i < 0){
+            $a = '';
+        } else {
+            $a = $world[$i];
+        }
+        for($k = $j - 1; $k >= 0; $k--){
+            array_unshift($data, $a . $world[$k]);
+        }
+        self::getWorldArr($world,$i - 1,26, $data);
+    }
 
     /**
      * 获取excel表格数据

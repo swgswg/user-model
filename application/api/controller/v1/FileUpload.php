@@ -122,14 +122,14 @@ class FileUpload extends BaseController
     public function dataToExcel()
     {
         $heads = [
-            'A' => 'ID',
-            'B' => '路由',
-            'C' => '版本',
-            'D' => '路由名称',
-            'E' => '路由描述',
-            'F' => '路由排序',
-            'G' => '路由状态',
-            'H' => 'create_time',
+            'ID',
+            '路由',
+            '版本',
+            '路由名称',
+            '路由描述',
+            '路由排序',
+            '路由状态',
+            '创建时间',
         ];
         $keys = [
             'id', 'auth_route', 'auth_route_version', 'auth_name',
