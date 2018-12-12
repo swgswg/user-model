@@ -19,6 +19,7 @@ class editRoleValidate extends BaseValidate
         'role_group'  => 'isPositiveInteger',
         'role_order'  => 'isPositiveInteger',
         'role_status' => 'in:1,2',
+        'role_auth'   => 'isArr'
     ];
 
     protected $message=[

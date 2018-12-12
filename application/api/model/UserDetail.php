@@ -27,21 +27,21 @@ class UserDetail extends BaseModel
     protected $deleteTime = 'delete_time';
 
     // 隐藏字段
-    protected $hidden = ['id','user_id', 'create_time', 'update_time', 'delete_time', 'ext'];
+    protected $hidden = ['id', 'create_time', 'update_time', 'delete_time', 'ext'];
 
 
     // 读取器 get-UserPhoto(数据库字段 驼峰命名法)-Attr(固定写法)
     // 设置完整性别
-    protected function getSexAttr($value)
-    {
-        if($value == 1) {
-            return '男';
-        } else if($value == 2) {
-            return '女';
-        } else {
-            return '未知';
-        }
-    }
+//    protected function getSexAttr($value)
+//    {
+//        if($value == 1) {
+//            return '男';
+//        } else if($value == 2) {
+//            return '女';
+//        } else {
+//            return '未知';
+//        }
+//    }
 
     public function user()
     {

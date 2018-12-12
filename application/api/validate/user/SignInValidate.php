@@ -13,13 +13,13 @@ use app\api\validate\BaseValidate;
 class SignInValidate extends BaseValidate
 {
     protected $rule = [
-        'user_name' => 'require|isNotEmpty|userNameValid',
-        'user_pass' => 'require|isNotEmpty|length:6,20'
+        'nickname' => 'require|isNotEmpty|userNameValid',
+        'password' => 'require|isNotEmpty|length:6,20'
     ];
 
     protected $message=[
-        'user_name.require' => '没有用户名你还想登录!!!',
-        'user_pass.require' => '没有密码你还想登录!!!'
+        'nickname.require' => '没有用户名你还想登录!!!',
+        'password.require' => '没有密码你还想登录!!!'
     ];
 
     /**

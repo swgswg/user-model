@@ -11,6 +11,7 @@ namespace app\api\controller\v1;
 
 use app\api\validate\IDMustBePositiveInt;
 use app\api\validate\user\AddUserRolesValidate;
+use app\lib\exception\ParameterException;
 use think\facade\Request;
 use app\api\model\User as UserModel;
 use app\api\service\SignIn as SignInService;
@@ -30,8 +31,8 @@ class User extends BaseController
 
     /**
      *  用户登录(可选用户名/电话/邮箱)
-     * @param user_name
-     * @param user_pass
+     * @param nickname
+     * @param password
      * @return \think\response\Json
      * @throws UserException
      * @throws \app\lib\exception\ParameterException
@@ -46,7 +47,7 @@ class User extends BaseController
         (new SignInValidate())->goCheck();
 
         // 登录
-        $data = SignInService::signIn();
+        $data = SignInService::signIn(1);
 
         return Output::out('登录', $data);
     }
@@ -54,6 +55,13 @@ class User extends BaseController
 
     /**
      *  注册
+     * @param nickname 昵称
+     * @param mobile   手机号
+     * @param code     手机验证码
+     * @param email    邮箱(可选)
+     * @param photo    头像(可选)
+     * @param password 密码
+     * @param repassword 重复密码
      * @return \think\response\Json
      * @throws UserException
      * @throws \app\lib\exception\ParameterException
@@ -73,7 +81,7 @@ class User extends BaseController
         unset($params['code']);
 
         // 注册
-        SignUpService::signUp($params);
+        SignUpService::signUp($params, 1);
 
         // {"message":"注册成功","state":1,"data":{"user_name":"176asdfa","user_photo":"http:\/\/user.com\/static\/images\/aaa.png","id":"6"},"error_code":"request:ok"}
         return Output::out('注册');
@@ -82,40 +90,40 @@ class User extends BaseController
 
     /**
      *  检测用户名是否存在
-     * @param user_name
+     * @param nickname
      * @throws UserException
      * @throws \app\lib\exception\ParameterException
      */
     public function userNameIsExist()
     {
         (new UserNameValidate())->goCheck();
-        SignUpService::userNameIsExist(Request::post());
+        SignUpService::userNameIsExist(Request::post(),1);
     }
 
 
     /**
      *  检测用户手机号是否存在
-     * @param user_mobile
+     * @param mobile
      * @throws UserException
      * @throws \app\lib\exception\ParameterException
      */
     public function userMobileIsExist()
     {
         (new UserMobileValidate())->goCheck();
-        SignUpService::userNameIsExist(Request::post());
+        SignUpService::userNameIsExist(Request::post(), 1);
     }
 
 
     /**
      *  检测用户是否存在
-     * @param user_email
+     * @param email
      * @throws UserException
      * @throws \app\lib\exception\ParameterException
      */
     public function userEmailIsExist()
     {
         (new UserEmailValidate())->goCheck();
-        SignUpService::userNameIsExist(Request::post());
+        SignUpService::userNameIsExist(Request::post(), 1);
     }
 
 
@@ -127,6 +135,7 @@ class User extends BaseController
      * @param order 排序数组
      * @return \think\response\Json
      * @throws \app\lib\exception\ParameterException
+     * @throws \think\exception\DbException
      */
     public function index()
     {
@@ -136,7 +145,7 @@ class User extends BaseController
         if($users->isEmpty()){
             return Output::out('获取所有用户', []);
         }
-        $data = $users->hidden(['user_pass', 'token', 'ext', 'update_time', 'delete_time'])
+        $data = $users->hidden(['password', 'token', 'ext', 'update_time', 'delete_time'])
             ->toArray();
         return Output::out('获取所有用户', $data);
     }
@@ -146,6 +155,7 @@ class User extends BaseController
      * 修改用户状态
      * @param id
      * @param status
+     * @return \think\response\Json
      * @throws UserException
      * @throws \app\lib\exception\ParameterException
      */
@@ -153,9 +163,15 @@ class User extends BaseController
     {
         (new EditStatusValidate())->goCheck();
         $user = $this->getUser(Request::post('id'));
-        $user->user_status = Request::post('status');
-        $user->save();
-        Output::out('状态修改');
+        $user -> status = Request::post('status');
+        $res = $user->save();
+        if(!$res){
+            throw new UserException([
+                'message'=>'修改用户状态失败',
+                'errorCode'=>20008
+            ]);
+        }
+        return Output::out('状态修改');
     }
 
 
@@ -172,24 +188,37 @@ class User extends BaseController
         $user = $this->getUser(Request::post('id'));
         $roles = $user->roles;
         if($roles->isEmpty()){
-            Output::out('获取用户角色', []);
+            return Output::out('获取用户角色', [
+                'roleIds'=>[],
+                'all'=>[]
+            ]);
         }
         $all = $roles->visible([
             'id',
             'role_name',
             'role_desc',
             'role_order',
-            'pivot.id',
-            'pivot.create_time'
+            'role_group',
+//            'role_status',
+//            'pivot.id',
+//            'pivot.rel_status',
+//            'pivot.create_time'
         ])->toArray();
-        return Output::out('获取用户角色', $all);
+        $roleIds = [];
+        foreach ($all as $k=>$v){
+            array_push($roleIds,$v['id']);
+        }
+        $roless['roleIds'] = $roleIds;
+        $roless['all'] = $all;
+
+        return Output::out('获取用户角色', $roless);
     }
 
 
     /**
      * 添加用户角色 可一次添加多个
      * @param id 用户id
-     * @param user_role 角色数组[1,2,3]
+     * @param user_role 角色json数组[1,2,3]
      * @return \think\response\Json
      * @throws UserException
      * @throws \app\lib\exception\ParameterException
@@ -204,7 +233,7 @@ class User extends BaseController
         }
         $res = $user->roles()->saveAll($user_role);
         if($res){
-            return Output::out('添加成功');
+            return Output::out('添加');
         } else {
             throw new UserException([
                 'code'=>400,

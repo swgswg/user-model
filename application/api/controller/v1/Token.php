@@ -9,15 +9,12 @@
 namespace app\api\controller\v1;
 
 
-use app\api\service\UserToken as UserTokenService;
-use app\lib\exception\ParameterException;
 use think\Request;
 use app\api\service\UserMiniToken;
 use app\api\validate\TokenGet;
-use app\api\validate\user\SignInValidate;
-use app\api\service\SignIn as SignInService;
 use app\api\controller\v1\common\Output;
 use app\api\service\Token as TokenService;
+use app\lib\exception\ParameterException;
 
 class Token extends BaseController
 {
@@ -39,23 +36,10 @@ class Token extends BaseController
 
 
     /**
-     * 登录获取token
-     */
-    public function signInGetToken()
-    {
-        (new SignInValidate())->goCheck();
-        $user = SignInService::signIn();
-        $ut = new UserTokenService($user['id']);
-        $token = $ut -> get();
-        return Output::out('获取Token', $token);
-    }
-
-
-    /**
      * 检测token
-     * @param token
-     * @return array
+     * @return \think\response\Json
      * @throws ParameterException
+     * @throws \app\lib\exception\TokenException
      */
     public function verifyToken()
     {

@@ -23,15 +23,17 @@ class UserDetail extends BaseController
 {
     /**
      *  获取单个用户详细信息
-     * @param  user_id 用户id
+     * @param  id 用户id
      * @return mixed
      * @throws \app\lib\exception\TokenException
      * @throws \think\Exception
      * @throws \think\Exception\DbException
      */
-    public function oneUserDetail()
+    public function detail()
     {
-        $user_id = TokenService::getCurrentUid();
+//        $user_id = TokenService::getCurrentUid();
+        (new IDMustBePositiveInt())->goCheck();
+        $user_id = Request::post('id');
         $userDetail = UserDetailModel::where('user_id', '=', $user_id)
             ->find();
         if(!$userDetail){
@@ -47,11 +49,12 @@ class UserDetail extends BaseController
     /**
      *  修改单个用户详细信息(用户自己操作)
      * @param user_id 用户id
+     * @return \think\response\Json
      * @throws \app\lib\exception\ParameterException
      * @throws \app\lib\exception\TokenException
      * @throws \think\Exception
      */
-    public function updateUserDetail()
+    public function updateDetail()
     {
         $user_id = TokenService::getCurrentUid();
         $validate = new AddUserDetailValidate();
@@ -59,35 +62,34 @@ class UserDetail extends BaseController
         // 根据规则取字段是很有必要的，防止恶意更新非客户端字段
         $detail = $validate->getDataByRule(Request::post());
         $this->createOrUpdate($user_id, $detail);
-        Output::out('修改用户详情');
+        return Output::out('修改用户详情');
     }
 
 
     /**
      *  修改单个用户详细信息(管理员操作)
      * @param id 用户id(必传且为id, 一定不是user_id, uid)
+     * @return \think\response\Json
      * @throws IllegalOperation
      * @throws UserException
      * @throws \app\lib\exception\ParameterException
      * @throws \app\lib\exception\TokenException
      * @throws \think\Exception
      */
-    public function editUserDetail()
+    public function editDetail()
     {
-        (new IDMustBePositiveInt())->goCheck();
-
+        $validate = new AddUserDetailValidate();
+        $validate->goCheck();
         $uid = TokenService::getCurrentUid();
         $user_id = Request::post('id');
         if($uid == $user_id){
             // 管理员修改用户详情的用户id不能跟自己id相同, 否则就是用户自己操作, 属于非法操作
             throw new IllegalOperation();
         }
-        $validate = new AddUserDetailValidate();
-        $validate->goCheck();
         // 根据规则取字段是很有必要的，防止恶意更新非客户端字段
         $detail = $validate->getDataByRule(Request::post());
         $this->createOrUpdate($user_id, $detail);
-        Output::out('修改用户详情');
+        return Output::out('修改用户详情');
     }
 
 

@@ -13,10 +13,10 @@ use app\api\validate\BaseValidate;
 class UserMobileValidate extends BaseValidate
 {
     protected $rule = [
-        'user_mobile' => 'require|isNotEmpty|isMobile',
+        'mobile' => 'require|isNotEmpty|isMobile',
     ];
 
     protected $message=[
-        'user_name.require' => '没有手机号',
+        'mobile.require' => '没有手机号',
     ];
 }

@@ -23,7 +23,7 @@ class BaseController extends Controller
         parent::__construct($app);
 
         // 查询用户访问进来的路由是否有权限
-        UserAuthService::getOneUserAuth();
+//        UserAuthService::getOneUserAuth();
     }
 
 

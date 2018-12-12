@@ -38,6 +38,11 @@ class User extends BaseModel
         return $this->prefixImgUrl($value);
     }
 
+    protected function getLastLoginTimeAttr($value)
+    {
+        return date('Y-m-d H:i:s', $value);
+    }
+
     // 查询范围 查询状态为1的
     public function scopeUserStatus($query)
     {
@@ -85,9 +90,10 @@ class User extends BaseModel
 
 
     /**
-     * 展示所有用户 分页+条件+排序
+     * 展示所有用户+用户详情 分页+条件+排序
      * @param $wheres 前端传过来的条件 $wheres [page:1, pageSize: 15, where:[], order:[]]
      * @return \think\Paginator
+     * @throws \think\exception\DbException
      */
     public static function userCondition($wheres)
     {
@@ -107,7 +113,14 @@ class User extends BaseModel
             'login_count'     => '',
             'last_login_time' => '',
         ];
-        return self::paging($wheres, $whereFields, $orderFields);
+        $conditions = self::splicingCondition($wheres, $whereFields, $orderFields);
+        $pageDate = self::where($conditions['where'])
+            ->order($conditions['order'])
+            ->order('create_time','desc')
+            ->with('userDetail')
+            ->paginate($conditions['pageSize'], false, ['page'=>$conditions['page']]);
+        return $pageDate;
+//        return self::paging($wheres, $whereFields, $orderFields);
     }
 
 

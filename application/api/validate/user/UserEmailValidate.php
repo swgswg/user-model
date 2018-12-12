@@ -13,11 +13,11 @@ use app\api\validate\BaseValidate;
 class UserEmailValidate extends BaseValidate
 {
     protected $rule = [
-        'user_mobile' => 'require|isNotEmpty|email',
+        'email' => 'require|isNotEmpty|email',
     ];
 
     protected $message=[
-        'user_name.require' => '没有邮箱',
-        'user_name.email' => '邮箱格式错误',
+        'email.require' => '没有邮箱',
+        'email.email' => '邮箱格式错误',
     ];
 }

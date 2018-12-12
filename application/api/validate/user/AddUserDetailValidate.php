@@ -13,10 +13,11 @@ use app\api\validate\BaseValidate;
 class AddUserDetailValidate extends BaseValidate
 {
     protected $rule = [
+        'id'         => 'require|isPositiveInteger',
         'user_money' => 'money',
         'user_point' => 'between:0,65535',
         'user_grade' => 'between:0,255',
-        'birthday'   => 'dateFormat:y-m-d',
+        'birthday'   => 'dateFormat:Y-m-d',
         'sex'        => 'in:0,1,2',
         'real_name'  => 'chs',
         'id_card'    => 'idCard',

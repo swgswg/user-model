@@ -15,4 +15,10 @@ class EditStatusValidate extends BaseValidate
         'id'=>'require|isPositiveInteger',
         'status' => 'require|in:1,2'
     ];
+
+    protected $message=[
+        'id.require'=> 'ID不能缺少',
+        'auth_status.require'=> '状态不能缺少',
+        'auth_status.in' => '权限状态格式不正确,在1,2之间选择',
+    ];
 }

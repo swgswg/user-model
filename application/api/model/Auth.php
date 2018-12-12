@@ -9,6 +9,7 @@
 namespace app\api\model;
 
 
+use app\lib\exception\AuthException;
 use think\model\concern\SoftDelete;
 
 class Auth extends BaseModel
@@ -33,9 +34,23 @@ class Auth extends BaseModel
     public function scopeAuthStatus($query)
     {
         // 继承 BaseModel
-        return $this->scopeStatus($query, 'auth_status');
+        $this->scopeStatus($query, 'auth_status');
     }
 
+    public static function init()
+    {
+        self::event('before_insert', function ($auth) {
+            $auth = self::routeExist($auth->auth_route);
+            if($auth){
+                throw new AuthException([
+                    'message'=>'权限路由已经存在,不要重复添加',
+                    'errorCode'=> 40002
+                ]);
+            } else {
+                return true;
+            }
+        });
+    }
 
     /**
      * 根据条件获取所有的权限 分页+条件+排序
@@ -64,4 +79,21 @@ class Auth extends BaseModel
         return self::paging($wheres, $whereFields, $orderFields);
     }
 
+
+    // 判断路由是否存在
+    public static function routeExist($auth_route)
+    {
+        $auth = self::where('auth_route', '=', $auth_route)->find();
+        return $auth;
+    }
+
+
+    // 根据条件获取权限
+    public static function authWhere($where = [])
+    {
+        $auths = self::where($where)
+            ->order('create_time', 'desc')
+            ->select();
+        return $auths;
+    }
 }

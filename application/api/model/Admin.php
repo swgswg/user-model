@@ -26,14 +26,14 @@ class Admin extends BaseModel
     use SoftDelete;
     protected $deleteTime = 'delete_time';
 
-    // 用户角色 一对多
+    // 用户角色 多对多
     public function roles()
     {
-        return $this->belongsToMany('Role', 'user_role_rel','role_id', 'user_id');
+        return $this->belongsToMany('Role', '\\app\\api\\model\\AdminRole','role_id', 'admin_id');
     }
 
     /**
-     *  获取用户的角色和权限
+     *  获取管理员的角色和权限
      * @param $id
      * @return mixed
      * @throws \think\db\exception\DataNotFoundException
@@ -44,7 +44,7 @@ class Admin extends BaseModel
     {
         $auths = self::with(['roles', 'roles.auths'])
             ->find($id);
-//        $auths = $auths['roles']->visible(['auths'=>['auth_route', 'auth_status'=>1]])->toArray();
+        $auths = $auths['roles']->visible(['auths'=>['auth_route', 'auth_status']])->toArray();
         return $auths;
     }
 }

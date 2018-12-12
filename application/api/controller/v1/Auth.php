@@ -8,6 +8,8 @@
 
 namespace app\api\controller\v1;
 
+use app\api\validate\auth\AuthRouteExist;
+use app\api\validate\auth\AuthWhereValidate;
 use app\api\validate\SplicingConditionValidate;
 use think\facade\Request;
 use app\api\model\Auth as AuthModel;
@@ -21,17 +23,6 @@ use app\api\controller\v1\common\Output;
 class Auth extends BaseController
 {
     /**
-     *
-     * @param page
-     * @param pageSize
-     * @param auth_route
-     * @param auth_version
-     * @param auth_name
-     * @param auth_status
-     * @return \think\response\Json
-     * @throws \app\lib\exception\ParameterException
-     */
-    /**
      * 获取所有的auth 条件+分页
      * @param page
      * @param pageSize
@@ -39,7 +30,6 @@ class Auth extends BaseController
      * @param order 排序数组
      * @return \think\response\Json
      * @throws \app\lib\exception\ParameterException
-     * @throws \think\exception\DbException
      */
     public function index()
     {
@@ -51,7 +41,6 @@ class Auth extends BaseController
         $auths = $auths->toArray();
         return Output::out('获取所有权限', $auths);
     }
-
 
 
     /**
@@ -71,7 +60,30 @@ class Auth extends BaseController
 
 
     /**
+     * 判断路由是否存在
+     * @param auth_route 权限路由
+     * @return \think\response\Json
+     * @throws \app\lib\exception\ParameterException
+     */
+    public function routeExist()
+    {
+        (new AuthRouteExist())->goCheck();
+        $auth = AuthModel::routeExist(Request::post('auth_route'));
+        if($auth){
+            return Output::out('权限路由已经存在', 1);
+        } else {
+            return Output::out('权限路由不存在', 0);
+        }
+    }
+
+    /**
      * 添加单个权限
+     * @param auth_route
+     * @param auth_route_version
+     * @param auth_name
+     * @param auth_desc
+     * @param auth_order
+     * @param auth_status
      * @return \think\response\Json
      * @throws \app\lib\exception\ParameterException
      */
@@ -80,7 +92,15 @@ class Auth extends BaseController
         $validate = new CreateAuthValidate();
         $validate->goCheck();
         $newData = $validate->getDataByRule(Request::post());
-        AuthModel::create($newData);
+        $newData['auth_route'] = '/'. trim($newData['auth_route'], '/');
+
+        $auth = AuthModel::create($newData);
+        if(!$auth){
+            new AuthException([
+                'message'=> '添加权限失败',
+                'errorCode' => 40001
+            ]);
+        }
         return Output::out('添加权限');
     }
 
@@ -88,7 +108,7 @@ class Auth extends BaseController
     /**
      * 修改单个权限
      * @param auth_route
-     * @param auth_version
+     * @param auth_route_version
      * @param auth_name
      * @param auth_desc
      * @param auth_order
@@ -109,7 +129,6 @@ class Auth extends BaseController
     }
 
 
-
     /**
      * 修改状态
      * @param id
@@ -128,7 +147,6 @@ class Auth extends BaseController
     }
 
 
-
     /**
      * 删除单个权限 软删除
      * @param id
@@ -142,6 +160,28 @@ class Auth extends BaseController
         $auth = $this->getAuth(Request::post('id'));
         $auth->delete();
         return Output::out('删除权限');
+    }
+
+
+    // 根据条件获取所有权限, 不分页
+    public function authWhere()
+    {
+        (new AuthWhereValidate())->goCheck();
+
+        $where = json_decode(Request::post('where'));
+        if(empty($where)){
+            $auths = AuthModel::authWhere();
+        } else {
+            $auths = AuthModel::authWhere($where);
+        }
+
+        if($auths->isEmpty()){
+            $data = [];
+        } else {
+            $data = $auths->visible(['id', 'auth_name'])->toArray();
+        }
+        return Output::out('获取条件权限', $data);
+
     }
 
     // 获取权限

@@ -9,6 +9,7 @@
 namespace app\api\service;
 
 
+use app\api\model\Admin as AdminModel;
 use app\lib\enum\ScopeEnum;
 use app\lib\exception\UserException;
 use think\facade\Request;
@@ -19,6 +20,7 @@ class SignIn
 {
     /**
      *  用户登录(可选用户名/电话/邮箱)
+     * @param $userOrAdmin 1用户/2管理员
      * @return array|null|\PDOStatement|string|\think\Model
      * @throws ParameterException
      * @throws UserException
@@ -26,23 +28,23 @@ class SignIn
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
-    public static function signIn()
+    public static function signIn($userOrAdmin = 1)
     {
         $telReg = '/^1[3456789]\d{9}$/';
         $emailReg = '/^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/';
         $string = '/^\w{4,20}$/';
-        $user_name = Request::post('user_name');
-        $user_pass = Request::post('user_pass');
+        $nickname = Request::post('nickname');
+        $password = Request::post('password');
 
-        if(preg_match($telReg,$user_name)){
+        if(preg_match($telReg,$nickname)){
             // 手机号登录
-            $data = self::userSignIn('user_mobile', $user_name, $user_pass);
-        } else if(preg_match($emailReg,$user_name)) {
+            $data = self::userSignIn('mobile', $nickname, $password, $userOrAdmin);
+        } else if(preg_match($emailReg,$nickname)) {
             // 邮箱登录
-            $data = self::userSignIn('user_email', $user_name, $user_pass);
-        } else if(preg_match($string,$user_name)){
+            $data = self::userSignIn('email', $nickname, $password, $userOrAdmin);
+        } else if(preg_match($string,$nickname)){
             // 用户名登录
-            $data = self::userSignIn('user_name', $user_name, $user_pass);
+            $data = self::userSignIn('nickname', $nickname, $password, $userOrAdmin);
         } else {
             throw new ParameterException();
         }
@@ -54,7 +56,7 @@ class SignIn
         }
 
 //        $data['scope'] = ScopeEnum::User;
-        $token = self::getToken($data['id']);
+        $token = self::getToken($data['id'], $userOrAdmin);
         unset($data['id']);
         $data['token'] = $token;
         return $data;
@@ -64,11 +66,12 @@ class SignIn
     /**
      *  获取用户的唯一token
      * @param $user_id
+     * @param $userOrAdmin 1用户/2管理员
      * @return string
      */
-    private static function getToken($user_id)
+    private static function getToken($user_id, $userOrAdmin)
     {
-        $ut = new UserToken($user_id);
+        $ut = new UserToken($user_id, $userOrAdmin);
         $token = $ut -> get();
         return $token;
     }
@@ -76,26 +79,43 @@ class SignIn
 
     /**
      * @param $field      登录字段(user_mobile/user_email/user_name)
-     * @param $user_name  登录名
-     * @param $user_pass  密码
+     * @param $nickname  登录名
+     * @param $password  密码
+     * @param $userOrAdmin 1用户/2管理员
      * @return array|null|\PDOStatement|string|\think\Model
      * @throws UserException
      * @throws \think\db\exception\DataNotFoundException
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
-    private static function userSignIn($field, $user_name, $user_pass)
+    private static function userSignIn($field, $nickname, $password, $userOrAdmin = 1)
     {
-        // 用户登录
-        $user = UserModel::where($field,'=',$user_name)
-            ->where('user_pass', '=', $user_pass)
-            ->visible(['id','user_name', 'user_photo'])
-            ->find();
+        if($userOrAdmin === 1){
+            // 用户登录
+            $user = UserModel::where($field,'=',$nickname)
+                ->where('password', '=', $password)
+                ->visible(['id','nickname', 'photo'])
+                ->find();
+        } else if($userOrAdmin === 2){
+            // 用户登录
+            $user = AdminModel::where($field,'=',$nickname)
+                ->where('password', '=', $password)
+                ->visible(['id','nickname', 'photo'])
+                ->find();
+        }
+
         if(!$user){
             throw new UserException();
         }
 
         // 更新登录信息
+        return self::updateLoginInfo($user, $userOrAdmin);
+    }
+
+
+    // 更新登录信息
+    private static function updateLoginInfo($user, $userOrAdmin = 1)
+    {
         $user->last_login_ip = $_SERVER['REMOTE_ADDR'];
         $user->last_login_time = time();
         $user->login_count	= ['inc', 1];
@@ -106,14 +126,23 @@ class SignIn
                 'errorCode' => 20001
             ]);
         }
-        if($user->user_status == 2){
-            throw new UserException([
-                'code'=>403,
-                'message' => '用户禁止登陆',
-                'errorCode' => 20005
-            ]);
+        if($userOrAdmin === 1){
+            if($user->status == 2){
+                throw new UserException([
+                    'code'=>403,
+                    'message' => '用户禁止登陆',
+                    'errorCode' => 20005
+                ]);
+            }
+        } else if($userOrAdmin === 2){
+            if($user->status == 2){
+                throw new UserException([
+                    'code'=>403,
+                    'message' => '用户禁止登陆',
+                    'errorCode' => 20005
+                ]);
+            }
         }
         return $user;
     }
-
 }

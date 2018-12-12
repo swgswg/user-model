@@ -68,12 +68,20 @@ class Token
     public static function getCurrentTokenVar($key)
     {
         $token = Request::header('token');
-        $vars = Cache::get($token);
+//        $vars = Cache::get($token);
+        $vars = UserCryptic::decryptToken($token);
+
         if(!$vars){
             throw new TokenException();
         } else {
             if(!is_array($vars)){
                 $vars = json_decode($vars, true);
+                if(array_key_exists($key, $vars)){
+                    return $vars[$key];
+                } else {
+                    throw new Exception('尝试获取token变量并不存在');
+                }
+            } else {
                 if(array_key_exists($key, $vars)){
                     return $vars[$key];
                 } else {
@@ -178,10 +186,12 @@ class Token
      * 检测Token是否存在
      * @param string $token
      * @return bool
+     * @throws TokenException
      */
     public static function verifyToken($token = '')
     {
-        $exist = Cache::get('token');
+//        $exist = Cache::get('token');
+        $exist = UserCryptic::tokenExpire($token);
         if($exist){
             return true;
         } else {

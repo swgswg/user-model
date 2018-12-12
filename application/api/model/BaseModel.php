@@ -34,7 +34,7 @@ class BaseModel extends Model
      * @param array $orderFields order字段
      * @return array
      */
-    private static function splicingCondition($condition, $whereFields = [], $orderFields = [])
+    protected static function splicingCondition($condition, $whereFields = [], $orderFields = [])
     {
         $page = self::splicingPage($condition);
 

@@ -21,7 +21,26 @@ class BaseValidate extends Validate
         // 获取http传入的参数
         // 对参数做校验
         $params = Request::post();
+        return $this->checkParam($params);
 //        var_dump($params);
+//        $res = $this->batch()->check($params);
+//        if(!$res){
+//            $err = $this->getError();
+//            if(is_array($err)){
+//                $err = implode(',',$err);
+//            }
+//            $e = new ParameterException([
+//                'message'=>$err
+//            ]);
+//            throw $e;
+//        } else {
+//            return true;
+//        }
+    }
+
+
+    public function checkParam($params)
+    {
         $res = $this->batch()->check($params);
         if(!$res){
             $err = $this->getError();
@@ -31,7 +50,7 @@ class BaseValidate extends Validate
             $e = new ParameterException([
                 'message'=>$err
             ]);
-//            $e->message = $this->getError();
+            // $e->message = $this->getError();
             throw $e;
         } else {
             return true;
@@ -106,14 +125,14 @@ class BaseValidate extends Validate
         // 获取照片的后缀
         $ext = strrchr($value, '.');
         if(!$ext){
-            return $field.'格式不正确';
+            return '文件格式不正确';
         }
         $type = substr($ext, 1);
         $typeArray = ['png', 'jpeg', 'jpg'];
         if(in_array($type, $typeArray)){
             return true;
         } else {
-            return $field.'格式不正确';
+            return '文件格式不正确';
         }
     }
 
@@ -151,6 +170,15 @@ class BaseValidate extends Validate
 //        }
 //    }
 
+
+    /**
+     * 验证数组
+     * @param $value
+     * @param string $rule
+     * @param string $data
+     * @param string $field
+     * @return bool|string
+     */
     protected function isArr($value, $rule = '', $data = '', $field = '')
     {
         $val = json_decode($value);
@@ -160,6 +188,32 @@ class BaseValidate extends Validate
             return $field.'是数组且不能为空';
         }
     }
+
+
+    // 路由正则
+    protected function routeReg($value, $rule = '', $data = '', $field = '')
+    {
+        $rule = '/^(\/\w+)+$/';
+        $result = preg_match($rule, $value);
+        if ($result) {
+            return true;
+        } else {
+            return $field.'格式不正确';
+        }
+    }
+
+
+    // 判断是不是合法的文件
+    protected function isUploadedFile($value)
+    {
+        if(is_uploaded_file($value)){
+           return true;
+        } else {
+            return '不是合法的文件';
+        }
+    }
+
+
 
     /**
      *  检测参数中是否包含user_id, 获取rule验证的参数

@@ -14,15 +14,18 @@ use app\lib\enum\ScopeEnum;
 class UserToken extends Token
 {
     protected $uid;
+    protected $userOrAdmin;
 
-    function __construct($uid)
+    function __construct($uid,$userOrAdmin = 1)
     {
         $this->uid = $uid;
+        $this->userOrAdmin = $userOrAdmin;
     }
 
     public function get()
     {
-        return $this->grantToken($this->uid);
+//        return $this->grantToken($this->uid);
+        return (new UserCryptic($this->uid, $this->userOrAdmin))->get();
     }
 
 
